@@ -12,27 +12,18 @@ const userSchema=new mongoose.Schema({
     },
     username:{
         type:String,
-        required:true,
-        trim:true,
-        unique:true,
-        index:true,
-        lowercase:true
+        default:''
     },
     email:{
-        type:String,
-        required:true,
-        trim:true,
-        unique:true,
-        lowercase:true
+        type:String
     },
     hash_password:{
-        type:String,
-        required:true
+        type:String
     },
     shopName:{
         type:String
     },
-    shop_Url:{
+    shopUrl:{
         type:String
     },
     role:{
@@ -40,14 +31,15 @@ const userSchema=new mongoose.Schema({
         enum:['user','admin', 'vendor'],
         default:'user'
     },
-    contectNumber:{
+    phoneNumber:{
         type:String
     },
     profilePicture:{
         type:String
     },
     forgotPasswordOtp:{
-        type:String
+        type:String,
+        expires: '2m'
     }
 },{timestamps:true});
 

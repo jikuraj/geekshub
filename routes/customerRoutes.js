@@ -41,7 +41,4 @@ router.delete("/cart/:cartId",auth, controller.deleteCart)
 
 
 
-
-
-
 module.exports=router;

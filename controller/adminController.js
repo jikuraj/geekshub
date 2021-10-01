@@ -78,7 +78,7 @@ exports.createProduct=async(req,res)=>{
 
     exports.getProduct = async (req, res) => {
         const user = req.user;
-        let userDetail = await productModel.find();
+        let userDetail = await productModel.find().sort({ name: 1 });
         return successResponseWithData(res,"success", userDetail )
     }
 

@@ -73,7 +73,7 @@ exports.singin = (req, res) => {
 
 exports.getProfile = async (req, res) => {
     const user = req.user;
-    let userDetail = await User.findOne({ _id: user._id }, { password: 0, hash_password: 0 });
+    let userDetail = await User.findOne({ _id: user._id }, { password: 0, hash_password: 0 ,forgotPasswordOtp: 0 });
     return successResponseWithData(res, "Success", userDetail );
 }
 
