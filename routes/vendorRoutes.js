@@ -7,6 +7,7 @@ router.post("/signup",validateSingupRequest,isRequestValidated,controller.singup
 router.post("/signin",validateSinginRequest,isRequestValidated,controller.singin);
 router.post("/logout",auth,controller.logout);
 router.post("/forgotPassword",controller.forgotPassword);
+router.put("/resetPassword",controller.resetPassword);
 
 
 module.exports=router;

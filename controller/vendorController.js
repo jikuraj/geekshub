@@ -55,6 +55,8 @@ exports.logout=async(req,res)=>{
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
+        const user=await User.findOne({email})
+        if(!user) return ErrorResponse(res ," email does not exit please enter valid email !")
         let otp = generateOTP(6);
         console.log(otp);
         let updatedUser = await User.findOneAndUpdate({ email }, { $set: { forgotPasswordOtp: otp } }, { new: true });
@@ -66,3 +68,26 @@ exports.forgotPassword = async (req, res) => {
         return ErrorResponse(res ," something is wrong !")
     }
 }
+
+exports.resetPassword= async (req,res)=>{
+    try {
+        const {email,otp,newPassword}=req.body;
+        let user=await User.findOne({email});
+        if(!user)  return ErrorResponse(res ," user not found for this email !");
+        if(!user.forgotPasswordOtp) return ErrorResponse(res ," reset password not valid !");
+            const token=user.forgotPasswordOtp
+            jwt.verify(token,process.env.JWT_SECREAT,async(err,payLoad)=>{
+                if(err) return ErrorResponse(res ," otp expired !");
+                if(otp!==payLoad.otp){
+                    return ErrorResponse(res ," wrong otp !")
+                }
+               await User.findOneAndUpdate({_id:user._id},{$set:{password:newPassword,forgotPasswordOtp:""}},{new:true});
+               return successResponseWithData(res,"success","password updated successfully")
+            });
+    } catch (error) {
+        return ErrorResponse(res,{ message: "some went wrong!" });
+
+    }
+}
+       
+

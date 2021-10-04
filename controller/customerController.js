@@ -141,9 +141,8 @@ exports.logout = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
-        User.findOne({email},(err,user)=>{
-            if(err||!user) return ErrorResponse(res ," email does not exit please enter valid email !")
-        })
+        const user=await User.findOne({email})
+            if(!user) return ErrorResponse(res ," email does not exit please enter valid email !")
         let otp = generateOTP(6);
         const token = jwt.sign({otp }, process.env.JWT_SECREAT, { expiresIn: '2m' });
         console.log(token);
