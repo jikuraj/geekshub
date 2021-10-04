@@ -7,57 +7,59 @@ const productModel = require("../models/productModel");
 const cartModel = require("../models/cartModel");
 const { successResponseWithData,ErrorResponse } = require("../helpers/apiResponse");
 
-exports.singup = (req, res) => {
-    const { firstName, lastName, email, password, username } = req.body;
-    User.findOne({ email: email })
-        .exec((error, user) => {
-            if (user) return ErrorResponse(res ,"email allready exits !")
-            
-        })
+exports.singup = async(req, res) => {
+    try {
+        const { firstName, lastName, email, password, username ,phoneNumber} = req.body;
+        const user=await User.findOne({ email: email })
+        if (user) return ErrorResponse(res ,"email allready exits !")
 
-    User.findOne({ username: username })
-        .exec((error, user) => {
-            if (user) return ErrorResponse(res ,"username allready exits !")
-        })
+    
+        const userName=await User.findOne({ username: username })
+        if (userName) return ErrorResponse(res ,"username allready exits !")
 
-    const _user = new User({
-        firstName,
-        lastName,
-        email,
-        password,
-        username: username
-    });;
-    _user.save((error, data) => {
-        if (error) {
-             return ErrorResponse(res ,"Something is wrong!")
-        }
-        if (data) {
-            return successResponseWithData(res, "Success", data );
-        }
-    })
+    
+        const _user = new User({
+            firstName,
+            lastName,
+            email,
+            phoneNumber,
+            password,
+            username: username
+        });;
+       const data=await  _user.save()
+       return successResponseWithData(res, "Success", data );
+
+    } catch (error) {
+        return ErrorResponse(res ,"Something is wrong!")
+    }
+   
 }
 
-exports.singin = (req, res) => {
-    User.findOne({ username: req.body.username })
-        .exec((error, user) => {
-            if (error) return res.status(400).json(error);
+exports.singin = async(req, res) => {
+    try {
+       const user=await User.findOne({ username: req.body.username });
+            if (!user)  return ErrorResponse(res ,error)
+
             if (user) {
                 if (user.authenticate(req.body.password)) {
-                    const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECREAT, { expiresIn: '2d' });
-                    const { _id, firstName, lastName, username, role, fullName } = user;
-                    let data = {  token,
+                    const token =await jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECREAT, { expiresIn: '2d' });
+                    const { _id, firstName, lastName,phoneNumber, username, role, fullName } = user;
+                    let data =await {  token,
                         user: {
-                            _id, firstName, lastName, username, role, fullName
+                            _id, firstName, lastName,phoneNumber, username, role, fullName
                         }}
                    return successResponseWithData(res, "Success", data );
 
                 } else {
                    return ErrorResponse(res ,"Invalid password !")
                 }
-            } else {
-                 return ErrorResponse(res ,"Invalid username !")
             }
-        })
+
+    } catch (error) {
+        return ErrorResponse(res ,"invalid username !")
+
+    }
+    
 }
 
 exports.getProfile = async (req, res) => {

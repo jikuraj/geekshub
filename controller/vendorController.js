@@ -7,10 +7,9 @@ const { successResponseWithData, ErrorResponse } = require("../helpers/apiRespon
 exports.singup = async (req, res) => {
     try {
         const { firstName, lastName, email, password, phoneNumber, shopName, shopUrl, } = req.body;
-        User.findOne({ email: email })
-            .exec((error, user) => {
-                if (user) return ErrorResponse(res, "email allready exits !")
-            });
+       const user=await User.findOne({ email: email })
+            if (user) return ErrorResponse(res, "email allready exits !")
+           
         let temp = { firstName, lastName, email, password, phoneNumber, shopName, shopUrl,role:"vendor"}
         let vendorDetail = await User.create(temp);
         
@@ -22,31 +21,32 @@ exports.singup = async (req, res) => {
 
 }
 
-exports.singin = (req, res) => {
-    User.findOne({ email: req.body.email })
-        .exec((error, user) => {
-            if (error) return res.status(400).json(error);
+exports.singin = async(req, res) => {
+    try {
+       const user=await User.findOne({ email:req.body.email });
+            if (!user)  return ErrorResponse(res ,error)
+
             if (user) {
-                if (user.authenticate(req.body.password) && user.role==='vendor') {
-                    const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECREAT, { expiresIn: '2d' });
-                    const { _id, firstName, lastName, email, role, fullName } = user;
-                    let data = {
-                        token,
+                if (user.authenticate(req.body.password)&&user.role==="vendor") {
+                    const token =await jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECREAT, { expiresIn: '2d' });
+                    const { _id, firstName, lastName,phoneNumber, email, role, fullName } = user;
+                    let data =await {  token,
                         user: {
-                            _id, firstName, lastName, email, role, fullName
-                        }
-                    }
-                    return successResponseWithData(res, "Success", data);
+                            _id, firstName, lastName,phoneNumber, email, role, fullName
+                        }}
+                   return successResponseWithData(res, "Success", data );
 
                 } else {
-                    return ErrorResponse(res, "Invalid password !")
+                   return ErrorResponse(res ,"Invalid password !")
                 }
-            } else {
-                return ErrorResponse(res, "Invalid email !")
             }
-        })
-}
 
+    } catch (error) {
+        return ErrorResponse(res ,"invalid username !")
+
+    }
+    
+}
 exports.logout=async(req,res)=>{
     return successResponseWithData(res, "Success", {});
 

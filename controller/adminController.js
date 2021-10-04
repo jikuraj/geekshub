@@ -7,33 +7,33 @@ const { successResponseWithData,ErrorResponse } = require("../helpers/apiRespons
 
 
 
-exports.singin=(req,res)=>{
-    User.findOne({email:req.body.email})
-    .exec((error,user)=>{
-        if(error) return ErrorResponse(res,error);
-        if(user){
-            if(user.authenticate(req.body.password) && user.role==='admin'){
-                const token=jwt.sign({_id:user._id, role:user.role},process.env.JWT_SECREAT, {expiresIn: '2d'});
-                const {_id,firstName,lastName,email,role,fullName}=user;
-                let data={
-                    token,
-                    user:{
-                       _id, firstName,lastName,email,role,fullName
-                    }
+
+exports.singin = async(req, res) => {
+    try {
+       const user=await User.findOne({email:req.body.email});
+            if (!user)  return ErrorResponse(res ,error)
+
+            if (user) {
+                if (user.authenticate(req.body.password)&& user.role==='admin') {
+                    const token =await jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECREAT, { expiresIn: '2d' });
+                    const { _id, firstName, lastName, email, role, fullName } = user;
+                    let data =await {  token,
+                        user: {
+                            _id, firstName, lastName, email, role, fullName
+                        }}
+                   return successResponseWithData(res, "Success", data );
+
+                } else {
+                   return ErrorResponse(res ,"Invalid password !")
                 }
-              return  successResponseWithData(res,"success",data);
-
-            }else{
-                return ErrorResponse(res,{
-                    message:'Invalid password'
-                })
             }
-        }else{
-            return ErrorResponse(res,{message:'somethink went wrong'})
-        }
-    })
-}
 
+    } catch (error) {
+        return ErrorResponse(res ,"invalid email !")
+
+    }
+    
+}
 exports.createProduct=async(req,res)=>{  
     try {
         const {
