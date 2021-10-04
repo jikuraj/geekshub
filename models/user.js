@@ -39,7 +39,7 @@ const userSchema=new mongoose.Schema({
     },
     forgotPasswordOtp:{
         type:String,
-        expires: '2m'
+        expireIn: '2m'
     }
 },{timestamps:true});
 
