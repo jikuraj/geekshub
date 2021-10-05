@@ -24,7 +24,8 @@ router.post('/product',auth,upload.array('image'),controller.createProduct);
 router.post("/signin",validateSinginRequest,isRequestValidated,controller.singin)
 router.post("/logout",auth,controller.logout);
 router.get("/productList",auth,controller.getProduct);
-router.get("/productDetail/:productId",controller.productDetail)
+router.get("/productDetail/:productId",controller.productDetail);
+router.post("/poster",auth,upload.array('image'),controller.poster)
 
 
 module.exports=router;

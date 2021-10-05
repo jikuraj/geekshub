@@ -29,7 +29,7 @@ const productSchema= new mongoose.Schema({
         }
 
     },
-    offer:{type:Number},
+    offerAndDiscount:{type:Number},
     image:[{
         img:{type:String}
     }],
@@ -40,6 +40,11 @@ const productSchema= new mongoose.Schema({
     },
         review:String
     }],
+    status:{
+        type:String,
+        enum:['ACTIVE','INACTIVE' ],
+        default:'ACTIVE'
+    },
     category:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Category",

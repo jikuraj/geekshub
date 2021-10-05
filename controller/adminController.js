@@ -1,5 +1,7 @@
 const User=require("../models/user")
 const productModel=require("../models/productModel");
+const posterModel=require("../models/posterModel");
+
 const shortid=require("shortid");
 const slugify=require("slugify");
 const jwt=require("jsonwebtoken");
@@ -41,7 +43,10 @@ exports.createProduct=async(req,res)=>{
             colors,
             packageContents,
             itemSize,
-            details,category,
+            details,
+            category,
+            offerAndDiscount,
+            status
         }=req.body;
         let image=[];
     
@@ -60,8 +65,11 @@ exports.createProduct=async(req,res)=>{
                 packageContents,
                 itemSize,
                 details,
+                
             },
+            offerAndDiscount,
             image,
+            status
         }
     
        let productData= await productModel.create(product)
@@ -87,4 +95,21 @@ exports.createProduct=async(req,res)=>{
         const productId = req.params.productId;
         let productDetail = await productModel.findOne({_id:productId});
         return successResponseWithData(res,"success",productDetail)
-    } 
+    } ;
+
+    exports.poster=async(req,res)=>{
+        try {
+            let image=[];
+            console.log(req.files.length);
+            if(req.files.length>0){
+                image= req.files.map(file=>{
+                    return {img:file.filename}
+                })
+            }
+            const temp={image};
+            const posterDetail=await posterModel.create(temp);
+            return successResponseWithData(res,"success",posterDetail)
+        } catch (error) {
+            return ErrorResponse(res,"some thing wet wrong!")
+        }
+    }

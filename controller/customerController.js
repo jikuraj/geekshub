@@ -5,19 +5,19 @@ const addressModel = require("../models/addressModel");
 const { send, generateOTP } = require("../helpers/utilitiy");
 const productModel = require("../models/productModel");
 const cartModel = require("../models/cartModel");
-const { successResponseWithData,ErrorResponse } = require("../helpers/apiResponse");
+const { successResponseWithData, ErrorResponse } = require("../helpers/apiResponse");
 
-exports.singup = async(req, res) => {
-    try {
-        const { firstName, lastName, email, password, username ,phoneNumber} = req.body;
-        const user=await User.findOne({ email: email })
-        if (user) return ErrorResponse(res ,"email allready exits !")
+exports.singup = async (req, res) => {
+    try { 
+        const { firstName, lastName, email, password, username, phoneNumber } = req.body;
+        const user = await User.findOne({ email: email })
+        if (user) return ErrorResponse(res, "email allready exits !")
 
-    
-        const userName=await User.findOne({ username: username })
-        if (userName) return ErrorResponse(res ,"username allready exits !")
 
-    
+        const userName = await User.findOne({ username: username })
+        if (userName) return ErrorResponse(res, "username allready exits !")
+
+
         const _user = new User({
             firstName,
             lastName,
@@ -26,46 +26,48 @@ exports.singup = async(req, res) => {
             password,
             username: username
         });;
-       const data=await  _user.save()
-       return successResponseWithData(res, "Success", data );
+        const data = await _user.save()
+        return successResponseWithData(res, "Success", data);
 
     } catch (error) {
-        return ErrorResponse(res ,"Something is wrong!")
+        return ErrorResponse(res, "Something is wrong!")
     }
-   
+
 }
 
-exports.singin = async(req, res) => {
+exports.singin = async (req, res) => {
     try {
-       const user=await User.findOne({ username: req.body.username });
-            if (!user)  return ErrorResponse(res ,error)
+        const user = await User.findOne({ username: req.body.username });
+        if (!user) return ErrorResponse(res, error)
 
-            if (user) {
-                if (user.authenticate(req.body.password)) {
-                    const token =await jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECREAT, { expiresIn: '2d' });
-                    const { _id, firstName, lastName,phoneNumber, username, role, fullName } = user;
-                    let data =await {  token,
-                        user: {
-                            _id, firstName, lastName,phoneNumber, username, role, fullName
-                        }}
-                   return successResponseWithData(res, "Success", data );
-
-                } else {
-                   return ErrorResponse(res ,"Invalid password !")
+        if (user) {
+            if (user.authenticate(req.body.password)) {
+                const token = await jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECREAT, { expiresIn: '2d' });
+                const { _id, firstName, lastName, phoneNumber, username, role, fullName,email } = user;
+                let data = await {
+                    token,
+                    user: {
+                        _id, firstName, lastName, phoneNumber, username, role, fullName,email
+                    }
                 }
+                return successResponseWithData(res, "Success", data);
+
+            } else {
+                return ErrorResponse(res, "Invalid password !")
             }
+        }
 
     } catch (error) {
-        return ErrorResponse(res ,"invalid username !")
+        return ErrorResponse(res, "invalid username !")
 
     }
-    
+
 }
 
 exports.getProfile = async (req, res) => {
     const user = req.user;
-    let userDetail = await User.findOne({ _id: user._id }, { password: 0, hash_password: 0 ,forgotPasswordOtp: 0 });
-    return successResponseWithData(res, "Success", userDetail );
+    let userDetail = await User.findOne({ _id: user._id }, { password: 0, hash_password: 0, forgotPasswordOtp: 0 });
+    return successResponseWithData(res, "Success", userDetail);
 }
 
 exports.updateProfile = async (req, res) => {
@@ -78,10 +80,10 @@ exports.updateProfile = async (req, res) => {
         lastName ? dataToSet.lastName = lastName : true;
         filename ? dataToSet.profilePicture = filename : true;
         let updatedUser = await User.findOneAndUpdate({ _id: user._id }, { $set: dataToSet }, { new: true })
-        return successResponseWithData(res, "Success", updatedUser );
+        return successResponseWithData(res, "Success", updatedUser);
     } catch (error) {
         console.log("error", error);
-        return ErrorResponse(res ," something is wrong !")
+        return ErrorResponse(res, " something is wrong !")
     }
 }
 
@@ -91,10 +93,10 @@ exports.addAddress = async (req, res) => {
         const { firstName, lastName, pincode, phone, address, city, state, landmark, addressType } = req.body;
         let temp = { firstName, lastName, pincode, phone, address, city, state, landmark, addressType, userId: user._id }
         let addressDetail = await addressModel.create(temp);
-        return successResponseWithData(res, "Success", addressDetail );
+        return successResponseWithData(res, "Success", addressDetail);
     } catch (error) {
         console.log("error", error);
-        return ErrorResponse(res ," something is wrong !") 
+        return ErrorResponse(res, " something is wrong !")
     }
 }
 
@@ -102,10 +104,10 @@ exports.getAddress = async (req, res) => {
     try {
         const user = req.user;
         let address = await addressModel.find({ userId: user._id, status: "ACTIVE" });
-        return successResponseWithData(res,"success",address)
+        return successResponseWithData(res, "success", address)
     } catch (error) {
         console.log("error", error);
-        return ErrorResponse(res,{ message: "somethink is wrong!" });
+        return ErrorResponse(res, { message: "somethink is wrong!" });
     }
 }
 
@@ -127,75 +129,82 @@ exports.editAddress = async (req, res) => {
         addressType ? dataToSet.addressType = addressType : true;
 
         let updatedAddress = await addressModel.findByIdAndUpdate({ _id: addressId }, { $set: dataToSet }, { new: true });
-        return successResponseWithData(res,"success",updatedAddress)
+        return successResponseWithData(res, "success", updatedAddress)
     } catch (error) {
         console.log("error", error);
-        return ErrorResponse(res,{ message: "somethink is wrong!" });
+        return ErrorResponse(res, { message: "somethink is wrong!" });
     }
 }
 
 exports.logout = async (req, res) => {
-    return successResponseWithData(res, "Success", {} );
+    return successResponseWithData(res, "Success", {});
 }
 
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
-        const user=await User.findOne({email})
-            if(!user) return ErrorResponse(res ," email does not exit please enter valid email !")
+        const user = await User.findOne({ email })
+        if (!user) return ErrorResponse(res, " email does not exit please enter valid email !")
         let otp = generateOTP(6);
-        const token = jwt.sign({otp }, process.env.JWT_SECREAT, { expiresIn: '2m' });
+        const token = jwt.sign({ otp }, process.env.JWT_SECREAT, { expiresIn: '2m' });
         console.log(token);
         let updatedUser = await User.findOneAndUpdate({ email }, { $set: { forgotPasswordOtp: token } }, { new: true });
         console.log(updatedUser);
         send(email, "FORGOT PASSWORD", otp)
-        return successResponseWithData(res, "Success", {} );
+        return successResponseWithData(res, "Success", {});
     } catch (error) {
         console.log("error", error);
-        return ErrorResponse(res ," something is wrong !")
+        return ErrorResponse(res, " something is wrong !")
     }
 }
 
-exports.resetPassword= async (req,res)=>{
+exports.resetPassword = async (req, res) => {
     try {
-        const {email,otp,newPassword}=req.body;
-        let user=await User.findOne({email});
-        if(!user)  return ErrorResponse(res ," user not found for this email !");
-        if(!user.forgotPasswordOtp) return ErrorResponse(res ," reset password not valid !");
-            const token=user.forgotPasswordOtp
-            jwt.verify(token,process.env.JWT_SECREAT,async(err,payLoad)=>{
-                if(err) return ErrorResponse(res ," otp expired !");
-                if(otp!==payLoad.otp){
-                    return ErrorResponse(res ," wrong otp !")
-                }
-               await User.findOneAndUpdate({_id:user._id},{$set:{password:newPassword,forgotPasswordOtp:""}},{new:true});
-               return successResponseWithData(res,"success","password updated successfully")
-            });
-       
+        const { email, otp, newPassword } = req.body;
+        let user = await User.findOne({ email });
+        if (!user) return ErrorResponse(res, " user not found for this email !");
+        if (!user.forgotPasswordOtp) return ErrorResponse(res, " reset password not valid !");
+        const token = user.forgotPasswordOtp
+        jwt.verify(token, process.env.JWT_SECREAT, async (err, payLoad) => {
+            if (err) return ErrorResponse(res, " otp expired !");
+            if (otp !== payLoad.otp) {
+                return ErrorResponse(res, " wrong otp !")
+            }
+            // await User.findOneAndUpdate({ _id: user._id }, { $set: { password: newPassword, forgotPasswordOtp: "" } }, { new: true });
+              user.password=newPassword
+              user.forgotPasswordOtp=""
+             await user.save()
+            return successResponseWithData(res, "success", "password updated successfully")
+        });
+
 
     } catch (error) {
-        return ErrorResponse(res,{ message: "some went wrong!" });
+        return ErrorResponse(res, { message: "some went wrong!" });
 
     }
 }
-       
+
 
 exports.getProduct = async (req, res) => {
     const user = req.user;
-    const { searchKey } = req.query;
+    const { searchKey, sortPrice, fromPrice, toPrice, color  } = req.query;
 
     let searchString = searchKey;
     searchString = new RegExp("^" + searchString, "i");
-    let criteria = {}
-    searchKey ? criteria.name = searchString : true;
+    let criteria = [{status:"ACTIVE"}]
+    searchKey ? criteria.push({name : searchString}) : true;
+    color ? criteria.push({"description.colors" : color}) : true;
+    fromPrice ? criteria.push({price : {$gte: fromPrice}}) : true;
+    toPrice ? criteria.push({price : {$lte: toPrice}}) : true;
 
-    let products = await productModel.find(criteria).sort({ name: 1 });
-    return successResponseWithData(res,"success", products );
+    let sort = sortPrice? {price: Number(sortPrice)}: { name: 1 }
+    let products = await productModel.find({$and:criteria}).sort(sort);
+    return successResponseWithData(res, "success", products);
 }
 exports.productDetail = async (req, res) => {
     const productId = req.params.productId;
     let productDetail = await productModel.findOne({ _id: productId });
-    return successResponseWithData(res,"success",productDetail)
+    return successResponseWithData(res, "success", productDetail)
 }
 
 exports.addToCart = async (req, res) => {
@@ -207,17 +216,17 @@ exports.addToCart = async (req, res) => {
             qty,
             userId: user._id,
         }
-        let itemInCart =  await cartModel.findOne({userId: user._id, item: itemId});
-        if(itemInCart){
-           let cartData =  await cartModel.findOneAndUpdate({_id: itemInCart._id}, {$inc:{qty: qty}}, {new: true});
-            return successResponseWithData(res,"success",cartData)
+        let itemInCart = await cartModel.findOne({ userId: user._id, item: itemId });
+        if (itemInCart) {
+            let cartData = await cartModel.findOneAndUpdate({ _id: itemInCart._id }, { $inc: { qty: qty } }, { new: true });
+            return successResponseWithData(res, "success", cartData)
         }
         let cartData = await cartModel.create(temp);
-        return successResponseWithData(res,"success",cartData)
+        return successResponseWithData(res, "success", cartData)
 
     } catch (error) {
         console.log("error", error);
-        return ErrorResponse(res,{ message: "somethink is wrong!" });
+        return ErrorResponse(res, { message: "somethink is wrong!" });
     }
 }
 
@@ -225,32 +234,32 @@ exports.getCart = async (req, res) => {
     try {
         const user = req.user;
         let cart = await cartModel.find({ userId: user._id }).populate("item");
-        return successResponseWithData(res,"success",cart)
+        return successResponseWithData(res, "success", cart)
     } catch (error) {
         console.log("error", error);
-        return ErrorResponse(res,{ message: "somethink is wrong!" });
+        return ErrorResponse(res, { message: "somethink is wrong!" });
     }
 }
 
-exports.updateCart = async(req,res)=>{
+exports.updateCart = async (req, res) => {
     try {
         const cartId = req.params.cartId;
-        const {qty} = req.body;
-        let cartData =  await cartModel.findOneAndUpdate({_id: cartId}, {$inc:{qty}}, {new: true});
-        return successResponseWithData(res,"success",cartData)
+        const { qty } = req.body;
+        let cartData = await cartModel.findOneAndUpdate({ _id: cartId }, { $inc: { qty } }, { new: true });
+        return successResponseWithData(res, "success", cartData)
     } catch (error) {
         console.log("error", error);
-        return ErrorResponse(res,{ message: "somethink is wrong!" });
+        return ErrorResponse(res, { message: "somethink is wrong!" });
     }
 }
 
-exports.deleteCart = async (req, res)=>{
+exports.deleteCart = async (req, res) => {
     try {
         const cartId = req.params.cartId;
-        await cartModel.deleteOne({_id: cartId});
-            return successResponseWithData(res,"success",{ })
+        await cartModel.deleteOne({ _id: cartId });
+        return successResponseWithData(res, "success", {})
     } catch (error) {
         console.log("error", error);
-        return ErrorResponse(res,{ message: "somethink is wrong!" });
+        return ErrorResponse(res, { message: "somethink is wrong!" });
     }
 }
