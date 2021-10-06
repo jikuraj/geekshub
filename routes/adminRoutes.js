@@ -28,4 +28,5 @@ router.get("/productDetail/:productId",controller.productDetail);
 router.post("/poster",auth,upload.array('image'),controller.poster)
 
 
+
 module.exports=router;

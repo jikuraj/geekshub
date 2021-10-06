@@ -10,8 +10,11 @@ exports.singup = async (req, res) => {
         const { firstName, lastName, email, password, phoneNumber, shopName, shopUrl, } = req.body;
         const user = await User.findOne({ email: email })
         if (user) return ErrorResponse(res, "email allready exits !")
+        let fName=req.body.firstName,
+            lName=req.body.lastName
+        const fullName=`${fName} ${lName}`
 
-        let temp = { firstName, lastName, email, password, phoneNumber, shopName, shopUrl, role: "vendor" }
+        let temp = { firstName, lastName, email, password,fullName, phoneNumber, shopName, shopUrl, role: "vendor" }
         let vendorDetail = await User.create(temp);
 
         return successResponseWithData(res, "Success", vendorDetail);

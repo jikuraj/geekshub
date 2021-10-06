@@ -34,6 +34,9 @@ const userSchema=new mongoose.Schema({
     phoneNumber:{
         type:String
     },
+    fullName:{
+        type:String
+    },
     profilePicture:{
         type:String
     },
@@ -48,10 +51,10 @@ userSchema.virtual('password')
 .set(function(password){
     this.hash_password=bcrypt.hashSync(password,10);
 });
-userSchema.virtual('fullName')
-.get(function(){
-    return `${this.firstName} ${this.lastName}`;
-})
+// userSchema.virtual('fullName')
+// .get(function(){
+//     return `${this.firstName} ${this.lastName}`;
+// })
 
 userSchema.methods={
     authenticate: function(password){
@@ -69,7 +72,8 @@ userModel.findOne({role:"admin"}, (err, dbData)=>{
         firstName:"admin",
         lastName:"admin",
         role: "admin",
-        username:"admin"
+        username:"admin",
+        fullName:`${firstName} ${lastName}`
     }, (err, dbData2)=>{
         if(err) return console.log("err", err);
        return console.log("dbData2", dbData2);

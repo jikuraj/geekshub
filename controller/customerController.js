@@ -13,6 +13,9 @@ exports.singup = async (req, res) => {
         const user = await User.findOne({ email: email })
         if (user) return ErrorResponse(res, "email allready exits !")
 
+        let fName=req.body.firstName,
+            lName=req.body.lastName
+        const fullName=`${fName} ${lName}`
 
         const userName = await User.findOne({ username: username })
         if (userName) return ErrorResponse(res, "username allready exits !")
@@ -24,6 +27,7 @@ exports.singup = async (req, res) => {
             email,
             phoneNumber,
             password,
+            fullName,
             username: username
         });;
         const data = await _user.save()
@@ -43,11 +47,11 @@ exports.singin = async (req, res) => {
         if (user) {
             if (user.authenticate(req.body.password)) {
                 const token = await jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECREAT, { expiresIn: '2d' });
-                const { _id, firstName, lastName, phoneNumber, username, role, fullName,email } = user;
+                const { _id, firstName, lastName, phoneNumber, username, role,fullName, email } = user;
                 let data = await {
                     token,
                     user: {
-                        _id, firstName, lastName, phoneNumber, username, role, fullName,email
+                        _id, firstName, lastName, phoneNumber, username, role,fullName,email
                     }
                 }
                 return successResponseWithData(res, "Success", data);

@@ -99,6 +99,7 @@ exports.createProduct=async(req,res)=>{
 
     exports.poster=async(req,res)=>{
         try {
+            
             let image=[];
             console.log(req.files.length);
             if(req.files.length>0){
@@ -109,6 +110,7 @@ exports.createProduct=async(req,res)=>{
             const temp={image};
             const posterDetail=await posterModel.create(temp);
             return successResponseWithData(res,"success",posterDetail)
+            
         } catch (error) {
             return ErrorResponse(res,"some thing wet wrong!")
         }
