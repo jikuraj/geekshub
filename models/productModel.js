@@ -29,7 +29,14 @@ const productSchema= new mongoose.Schema({
         }
 
     },
-    offerAndDiscount:{type:Number},
+    discount:{
+        type:Number,
+        default:0,
+        status:{
+            enum:["ACTIVE","INACTIVE"],
+            default:"ACTIVE",
+        }
+    },
     image:[{
         img:{type:String}
     }],

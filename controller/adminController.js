@@ -45,7 +45,7 @@ exports.createProduct=async(req,res)=>{
             itemSize,
             details,
             category,
-            offerAndDiscount,
+            discount,
             status
         }=req.body;
         let image=[];
@@ -67,7 +67,7 @@ exports.createProduct=async(req,res)=>{
                 details,
                 
             },
-            offerAndDiscount,
+            discount,
             image,
             status
         }
@@ -99,7 +99,7 @@ exports.createProduct=async(req,res)=>{
 
     exports.poster=async(req,res)=>{
         try {
-            
+            const {description}=req.body
             let image=[];
             console.log(req.files.length);
             if(req.files.length>0){
@@ -107,8 +107,9 @@ exports.createProduct=async(req,res)=>{
                     return {img:file.filename}
                 })
             }
-            const temp={image};
+            const temp={image,description};
             const posterDetail=await posterModel.create(temp);
+
             return successResponseWithData(res,"success",posterDetail)
             
         } catch (error) {

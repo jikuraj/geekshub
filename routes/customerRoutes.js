@@ -37,6 +37,8 @@ router.get("/cart",auth, controller.getCart)
 router.put("/cart/:cartId",auth, controller.updateCart)
 router.delete("/cart/:cartId",auth, controller.deleteCart)
 
+router.get("/homePage",controller.homePage);
+
 router.put("/resetPassword",controller.resetPassword);
 
 

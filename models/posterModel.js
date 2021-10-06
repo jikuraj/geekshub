@@ -10,7 +10,7 @@ const posterSchema=new mongoose.Schema({
     },
     description:{
         type:String
-    }
+    },
 
 },{timestamps:true})
 const posterModel=mongoose.model("Poster",posterSchema);

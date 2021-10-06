@@ -4,6 +4,7 @@ const { validationResult } = require("express-validator");
 const addressModel = require("../models/addressModel");
 const { send, generateOTP } = require("../helpers/utilitiy");
 const productModel = require("../models/productModel");
+const posterModel=require("../models/posterModel")
 const cartModel = require("../models/cartModel");
 const { successResponseWithData, ErrorResponse } = require("../helpers/apiResponse");
 
@@ -266,4 +267,19 @@ exports.deleteCart = async (req, res) => {
         console.log("error", error);
         return ErrorResponse(res, { message: "somethink is wrong!" });
     }
+}
+
+exports.homePage=async(req,res)=>{
+      const poster=await posterModel.find({status:"ACTIVE"}).limit(1);
+      const {discount}=req.query
+      let criteria=[{status:"ACTIVE" }];
+      discount ? criteria.push({discount : discount}) : true;
+
+      const product=await productModel.find({criteria})
+      const data={
+        poster,
+        product
+      }
+      return successResponseWithData(res,"success",data);
+
 }
