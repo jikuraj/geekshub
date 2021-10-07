@@ -8,6 +8,8 @@ const posterModel = require("../models/posterModel")
 const cartModel = require("../models/cartModel");
 const { successResponseWithData, ErrorResponse } = require("../helpers/apiResponse");
 const orderModel = require("../models/orderModel");
+const categoryModel = require("../models/categoryModel");
+const brandModel = require("../models/brandModel");
 
 exports.singup = async (req, res) => {
     try {
@@ -204,12 +206,17 @@ exports.getProduct = async (req, res) => {
     toPrice ? criteria.push({ price: { $lte: toPrice } }) : true;
 
     let sort = sortPrice ? { price: Number(sortPrice) } : { name: 1 }
-    let products = await productModel.find({ $and: criteria }).sort(sort);
+    let products = await productModel.find({ $and: criteria })
+    .populate("category")
+    .populate("brand")
+    .sort(sort);
     return successResponseWithData(res, "success", products);
 }
 exports.productDetail = async (req, res) => {
     const productId = req.params.productId;
-    let productDetail = await productModel.findOne({ _id: productId });
+    let productDetail = await productModel.findOne({ _id: productId })
+    .populate("category")
+    .populate("brand");
     return successResponseWithData(res, "success", productDetail)
 }
 
@@ -271,15 +278,42 @@ exports.deleteCart = async (req, res) => {
 }
 
 exports.homePage = async (req, res) => {
-    const poster = await posterModel.find({ status: "ACTIVE" }).limit(1);
-    const { discount } = req.query
-    let criteria = [{ status: "ACTIVE" }];
-    discount ? criteria.push({ discount: discount }) : true;
+    const poster = await posterModel.find({ status: "ACTIVE" });
+  
+    const product = await productModel.find({status: "ACTIVE" })
+    .populate("category")
+    .populate("brand")
 
-    const product = await productModel.find({ criteria })
+    const  category =await categoryModel.find({"status":"ACTIVE"})
+    const brands =await brandModel.find({"status":"ACTIVE"})
+    const topPicks =await orderModel.aggregate([
+        {$unwind: "$items"},
+        {$group:{
+            _id: "$items.productId",
+            count: {$sum: 1}
+        }},
+        {
+            $lookup: {
+            from: "products",
+            localField: "_id",
+            foreignField: "_id",
+            as: "productDetail",
+          },
+        },
+        {"$unwind":"$productDetail"},
+        {$sort: {count: -1}},
+        {$limit: 10}
+    ]) 
+    const vendor = await User.find({"role":"vendor"}, {firstName: 1,profilePicture:1 })
     const data = {
         poster,
-        product
+        product,
+        vendor,
+        topPicks,
+         brands,
+         category
+
+
     }
     return successResponseWithData(res, "success", data);
 
@@ -350,12 +384,7 @@ exports.getOrder = async (req, res) => {
             .lean();
         if (!order) return ErrorResponse(res, "order not found for this product")
         if (order) {
-            const address = await addressModel.findOne({ user: req.user._id });
-            if (!address) return ErrorResponse(res, "Address not found please add address")
-            // order.address = address.address.find(
-            //     (adr) => adr._id.toString() == order.addressId.toString()
-            //   );
-            const data = { order, address }
+            const data = { order }
             return successResponseWithData(res, "success", data)
         }
     } catch (error) {

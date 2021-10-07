@@ -54,7 +54,11 @@ const productSchema= new mongoose.Schema({
     },
     category:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"Category",
+        ref:"categories",
+    },
+    brand:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"brands",
     },
     
 },{timestamps:true});

@@ -7,6 +7,8 @@ const shortid = require("shortid");
 const slugify = require("slugify");
 const jwt = require("jsonwebtoken");
 const { successResponseWithData, ErrorResponse } = require("../helpers/apiResponse");
+const brandModel = require("../models/brandModel");
+const categoryModel = require("../models/categoryModel");
 
 
 
@@ -48,8 +50,10 @@ exports.createProduct = async (req, res) => {
             itemSize,
             details,
             category,
+            brand,
             discount,
-            status
+            status,
+
         } = req.body;
         let image = [];
 
@@ -72,7 +76,8 @@ exports.createProduct = async (req, res) => {
             },
             discount,
             image,
-            status
+            brand,
+            category
         }
 
         let productData = await productModel.create(product)
@@ -141,16 +146,50 @@ exports.getOrder = async (req, res) => {
             .lean();
         if (!order) return ErrorResponse(res, "order not found for this product")
         if (order) {
-            const address = await addressModel.findOne({ user: req.user._id });
-            if (!address) return ErrorResponse(res, "Address not found please add address")
-            // order.address = address.address.find(
-            //     (adr) => adr._id.toString() == order.addressId.toString()
-            //   );
-            const data = { order, address }
+            
+            const data = { order }
             return successResponseWithData(res, "success", data)
         }
     } catch (error) {
         return ErrorResponse(res, "some thing went wrong!");
     }
 
+}
+
+exports.addBrand = async (req, res) => {
+    try {
+        const { name } = req.body
+        let image = [];
+        if (req.files.length > 0) {
+            image = req.files.map(file => {
+                return { img: file.filename }
+            })
+        }
+        const temp = { image, name };
+        const brand = await brandModel.create(temp);
+
+        return successResponseWithData(res, "success", brand)
+
+    } catch (error) {
+        return ErrorResponse(res, "some thing wet wrong!")
+    }
+}
+
+exports.addCategory = async (req, res) => {
+    try {
+        const { name } = req.body
+        let image = [];
+        if (req.files.length > 0) {
+            image = req.files.map(file => {
+                return { img: file.filename }
+            })
+        }
+        const temp = { image, name };
+        const category = await categoryModel.create(temp);
+
+        return successResponseWithData(res, "success", category)
+
+    } catch (error) {
+        return ErrorResponse(res, "some thing wet wrong!")
+    }
 }

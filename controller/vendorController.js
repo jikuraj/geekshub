@@ -108,7 +108,7 @@ exports.createProduct = async (req, res) => {
             itemSize,
             details,
             category,
-            status
+            brand
         } = req.body;
         let image = [];
 
@@ -129,7 +129,8 @@ exports.createProduct = async (req, res) => {
                 details
             },
             image,
-            status
+            category,
+            brand
         }
 
         let productData = await productModel.create(product)
@@ -143,12 +144,17 @@ exports.createProduct = async (req, res) => {
 
 exports.getProduct = async (req, res) => {
     const user = req.user;
-    let userDetail = await productModel.find().sort({ name: 1 });
+    let userDetail = await productModel.find()
+    .populate("category")
+    .populate("brand")
+    .sort({ name: 1 });
     return successResponseWithData(res, "success", userDetail)
 }
 exports.productDetail = async (req, res) => {
     const productId = req.params.productId;
-    let productDetail = await productModel.findOne({ _id: productId });
+    let productDetail = await productModel.findOne({ _id: productId })
+    .populate("category")
+    .populate("brand");
     return successResponseWithData(res, "success", productDetail)
 };
 
@@ -173,12 +179,7 @@ exports.getOrder = async (req, res) => {
             .lean();
         if (!order) return ErrorResponse(res, "order not found for this product")
         if (order) {
-            const address = await addressModel.findOne({ user: req.user._id });
-            if (!address) return ErrorResponse(res, "Address not found please add address")
-            // order.address = address.address.find(
-            //     (adr) => adr._id.toString() == order.addressId.toString()
-            //   );
-            const data = { order, address }
+            const data = { order}
             return successResponseWithData(res, "success", data)
         }
     } catch (error) {
