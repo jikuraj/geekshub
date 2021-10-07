@@ -36,15 +36,18 @@ router.post("/cart",auth, controller.addToCart)
 router.get("/cart",auth, controller.getCart)
 router.put("/cart/:cartId",auth, controller.updateCart)
 router.delete("/cart/:cartId",auth, controller.deleteCart)
-
-router.get("/homePage",controller.homePage);
-
 router.put("/resetPassword",controller.resetPassword);
-
 router.post("/addOrder", auth, controller.addOrder);
 router.get("/getOrders",auth,  controller.getOrders);
 router.get("/getOrder/:orderId", auth, controller.getOrder);
 router.delete("/deleteOrder/:orderId", auth, controller.deleteOrder);
+
+router.get("/posterPage", controller.posterPage);
+router.get("/productPage" , controller.productPage);
+router.get("/vendorPage", controller.vendorPage);
+router.get("/topPicksPage",  controller.topPicksPage);
+router.get("/brandsPage", controller.brandsPage);
+router.get("/categoryPage",  controller.categoryPage);
 
 
 module.exports=router;

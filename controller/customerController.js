@@ -277,47 +277,7 @@ exports.deleteCart = async (req, res) => {
     }
 }
 
-exports.homePage = async (req, res) => {
-    const poster = await posterModel.find({ status: "ACTIVE" });
-  
-    const product = await productModel.find({status: "ACTIVE" })
-    .populate("category")
-    .populate("brand")
 
-    const  category =await categoryModel.find({"status":"ACTIVE"})
-    const brands =await brandModel.find({"status":"ACTIVE"})
-    const topPicks =await orderModel.aggregate([
-        {$unwind: "$items"},
-        {$group:{
-            _id: "$items.productId",
-            count: {$sum: 1}
-        }},
-        {
-            $lookup: {
-            from: "products",
-            localField: "_id",
-            foreignField: "_id",
-            as: "productDetail",
-          },
-        },
-        {"$unwind":"$productDetail"},
-        {$sort: {count: -1}},
-        {$limit: 10}
-    ]) 
-    const vendor = await User.find({"role":"vendor"}, {firstName: 1,profilePicture:1 })
-    const data = {
-        poster,
-        product,
-        vendor,
-        topPicks,
-         brands,
-         category
-
-
-    }
-    return successResponseWithData(res, "success", data);
-
-}
 
 exports.addOrder = async (req, res) => {
     try {
@@ -398,6 +358,93 @@ exports.deleteOrder = async (req, res) => {
         const orderId = req.params.orderId;
         await orderModel.deleteOne({ _id: orderId });
         return successResponseWithData(res, "success", {})
+    } catch (error) {
+        console.log("error", error);
+        return ErrorResponse(res, { message: "somethink is wrong!" });
+    }
+}
+
+exports.posterPage = async (req, res) => {
+    try {
+        const poster = await posterModel.find({ status: "ACTIVE" });
+        return successResponseWithData(res, "success", poster);
+    } catch (error) {
+        console.log("error", error);
+        return ErrorResponse(res, { message: "somethink is wrong!" });
+    }
+}
+
+exports.productPage = async (req, res) => {
+    try {
+
+     const product = await productModel.find({status: "ACTIVE" })
+    .populate("category")
+    .populate("brand")
+    return successResponseWithData(res, "success", product);
+    } catch (error) {
+        console.log("error", error);
+        return ErrorResponse(res, { message: "somethink is wrong!" });
+    }
+}
+
+exports.categoryPage = async (req, res) => {
+    try {
+        const  category =await categoryModel.find({"status":"ACTIVE"});
+        return successResponseWithData(res, "success", category);
+
+
+    } catch (error) {
+        console.log("error", error);
+        return ErrorResponse(res, { message: "somethink is wrong!" });
+    }
+}
+
+exports.brandsPage = async (req, res) => {
+    try {
+        const brands =await brandModel.find({"status":"ACTIVE"})
+        return successResponseWithData(res, "success", brands);
+
+
+    } catch (error) {
+        console.log("error", error);
+        return ErrorResponse(res, { message: "somethink is wrong!" });
+    }
+}
+
+exports.topPicksPage = async (req, res) => {
+    try {
+        const topPicks =await orderModel.aggregate([
+            {$unwind: "$items"},
+            {$group:{
+                _id: "$items.productId",
+                count: {$sum: 1}
+            }},
+            {
+                $lookup: {
+                from: "products",
+                localField: "_id",
+                foreignField: "_id",
+                as: "productDetail",
+              },
+            },
+            {"$unwind":"$productDetail"},
+            {$sort: {count: -1}},
+            {$limit: 10}
+        ]);
+
+        return successResponseWithData(res, "success", topPicks);
+
+
+    } catch (error) {
+        console.log("error", error);
+        return ErrorResponse(res, { message: "somethink is wrong!" });
+    }
+}
+
+exports.vendorPage = async (req, res) => {
+    try {
+        const vendor =await brandModel.find({"status":"ACTIVE"})
+        return successResponseWithData(res, "success", vendor);
     } catch (error) {
         console.log("error", error);
         return ErrorResponse(res, { message: "somethink is wrong!" });

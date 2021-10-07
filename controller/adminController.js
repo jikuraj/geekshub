@@ -52,7 +52,6 @@ exports.createProduct = async (req, res) => {
             category,
             brand,
             discount,
-            status,
 
         } = req.body;
         let image = [];
