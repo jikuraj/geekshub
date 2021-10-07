@@ -4,19 +4,20 @@ const { validationResult } = require("express-validator");
 const addressModel = require("../models/addressModel");
 const { send, generateOTP } = require("../helpers/utilitiy");
 const productModel = require("../models/productModel");
-const posterModel=require("../models/posterModel")
+const posterModel = require("../models/posterModel")
 const cartModel = require("../models/cartModel");
 const { successResponseWithData, ErrorResponse } = require("../helpers/apiResponse");
+const orderModel = require("../models/orderModel");
 
 exports.singup = async (req, res) => {
-    try { 
+    try {
         const { firstName, lastName, email, password, username, phoneNumber } = req.body;
         const user = await User.findOne({ email: email })
         if (user) return ErrorResponse(res, "email allready exits !")
 
-        let fName=req.body.firstName,
-            lName=req.body.lastName
-        const fullName=`${fName} ${lName}`
+        let fName = req.body.firstName,
+            lName = req.body.lastName
+        const fullName = `${fName} ${lName}`
 
         const userName = await User.findOne({ username: username })
         if (userName) return ErrorResponse(res, "username allready exits !")
@@ -48,11 +49,11 @@ exports.singin = async (req, res) => {
         if (user) {
             if (user.authenticate(req.body.password)) {
                 const token = await jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECREAT, { expiresIn: '2d' });
-                const { _id, firstName, lastName, phoneNumber, username, role,fullName, email } = user;
+                const { _id, firstName, lastName, phoneNumber, username, role, fullName, email } = user;
                 let data = await {
                     token,
                     user: {
-                        _id, firstName, lastName, phoneNumber, username, role,fullName,email
+                        _id, firstName, lastName, phoneNumber, username, role, fullName, email
                     }
                 }
                 return successResponseWithData(res, "Success", data);
@@ -176,9 +177,9 @@ exports.resetPassword = async (req, res) => {
                 return ErrorResponse(res, " wrong otp !")
             }
             // await User.findOneAndUpdate({ _id: user._id }, { $set: { password: newPassword, forgotPasswordOtp: "" } }, { new: true });
-              user.password=newPassword
-              user.forgotPasswordOtp=""
-             await user.save()
+            user.password = newPassword
+            user.forgotPasswordOtp = ""
+            await user.save()
             return successResponseWithData(res, "success", "password updated successfully")
         });
 
@@ -192,18 +193,18 @@ exports.resetPassword = async (req, res) => {
 
 exports.getProduct = async (req, res) => {
     const user = req.user;
-    const { searchKey, sortPrice, fromPrice, toPrice, color  } = req.query;
+    const { searchKey, sortPrice, fromPrice, toPrice, color } = req.query;
 
     let searchString = searchKey;
     searchString = new RegExp("^" + searchString, "i");
-    let criteria = [{status:"ACTIVE"}]
-    searchKey ? criteria.push({name : searchString}) : true;
-    color ? criteria.push({"description.colors" : color}) : true;
-    fromPrice ? criteria.push({price : {$gte: fromPrice}}) : true;
-    toPrice ? criteria.push({price : {$lte: toPrice}}) : true;
+    let criteria = [{ status: "ACTIVE" }]
+    searchKey ? criteria.push({ name: searchString }) : true;
+    color ? criteria.push({ "description.colors": color }) : true;
+    fromPrice ? criteria.push({ price: { $gte: fromPrice } }) : true;
+    toPrice ? criteria.push({ price: { $lte: toPrice } }) : true;
 
-    let sort = sortPrice? {price: Number(sortPrice)}: { name: 1 }
-    let products = await productModel.find({$and:criteria}).sort(sort);
+    let sort = sortPrice ? { price: Number(sortPrice) } : { name: 1 }
+    let products = await productModel.find({ $and: criteria }).sort(sort);
     return successResponseWithData(res, "success", products);
 }
 exports.productDetail = async (req, res) => {
@@ -269,17 +270,109 @@ exports.deleteCart = async (req, res) => {
     }
 }
 
-exports.homePage=async(req,res)=>{
-      const poster=await posterModel.find({status:"ACTIVE"}).limit(1);
-      const {discount}=req.query
-      let criteria=[{status:"ACTIVE" }];
-      discount ? criteria.push({discount : discount}) : true;
+exports.homePage = async (req, res) => {
+    const poster = await posterModel.find({ status: "ACTIVE" }).limit(1);
+    const { discount } = req.query
+    let criteria = [{ status: "ACTIVE" }];
+    discount ? criteria.push({ discount: discount }) : true;
 
-      const product=await productModel.find({criteria})
-      const data={
+    const product = await productModel.find({ criteria })
+    const data = {
         poster,
         product
-      }
-      return successResponseWithData(res,"success",data);
+    }
+    return successResponseWithData(res, "success", data);
 
 }
+
+exports.addOrder = async (req, res) => {
+    try {
+
+        const { totalAmount, payablePrice, quantity, paymentStatus, paymentType, addressId, productId } = req.body;
+        const user = req.user;
+        const temp = {
+            userId: user._id,
+            addressId: addressId,
+            totalAmount,
+            paymentStatus,
+            paymentType,
+            items: [{
+                payablePrice,
+                quantity,
+                productId: productId
+            }],
+            orderStatus: [
+                {
+                    type: "ordered",
+                    date: new Date(),
+                    isCompleted: true,
+                },
+                {
+                    type: "packed",
+                    isCompleted: false,
+                },
+                {
+                    type: "shipped",
+                    isCompleted: false,
+                },
+                {
+                    type: "delivered",
+                    isCompleted: false,
+                },
+            ]
+        }
+        const order = await orderModel.create(temp)
+        return successResponseWithData(res, "success", order)
+    } catch (error) {
+        console.log(error);
+        return ErrorResponse(res, "something went wrong!")
+    }
+}
+
+exports.getOrders = async (req, res) => {
+    try {
+        const user = req.user
+        const orderList = await orderModel.find({ user: user._id })
+            .select("_id paymentStatus paymentType orderStatus items")
+            .populate("items.productId", "_id name productPictures");
+        return successResponseWithData(res, "success", orderList)
+    } catch (error) {
+        return ErrorResponse(res, "some thing wet wrong!");
+    }
+
+}
+
+exports.getOrder = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const order = await orderModel.findOne({ _id: orderId })
+            .populate("items.productId", "_id name image")
+            .lean();
+        if (!order) return ErrorResponse(res, "order not found for this product")
+        if (order) {
+            const address = await addressModel.findOne({ user: req.user._id });
+            if (!address) return ErrorResponse(res, "Address not found please add address")
+            // order.address = address.address.find(
+            //     (adr) => adr._id.toString() == order.addressId.toString()
+            //   );
+            const data = { order, address }
+            return successResponseWithData(res, "success", data)
+        }
+    } catch (error) {
+        return ErrorResponse(res, "some thing went wrong!");
+    }
+
+}
+
+exports.deleteOrder = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        await orderModel.deleteOne({ _id: orderId });
+        return successResponseWithData(res, "success", {})
+    } catch (error) {
+        console.log("error", error);
+        return ErrorResponse(res, { message: "somethink is wrong!" });
+    }
+}
+
+

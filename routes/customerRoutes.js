@@ -37,13 +37,14 @@ router.get("/cart",auth, controller.getCart)
 router.put("/cart/:cartId",auth, controller.updateCart)
 router.delete("/cart/:cartId",auth, controller.deleteCart)
 
-router.get("/homePage",controller.homePage);
+router.get("/homePage",auth,controller.homePage);
 
 router.put("/resetPassword",controller.resetPassword);
 
-
-
-
+router.post("/addOrder", auth, controller.addOrder);
+router.get("/getOrders",auth,  controller.getOrders);
+router.get("/getOrder/:orderId", auth, controller.getOrder);
+router.delete("/deleteOrder/:orderId", auth, controller.deleteOrder);
 
 
 module.exports=router;

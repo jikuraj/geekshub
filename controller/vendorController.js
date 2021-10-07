@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const productModel = require("../models/productModel");
+const orderModel = require("../models/orderModel")
 const jwt = require("jsonwebtoken");
 const { send, generateOTP } = require("../helpers/utilitiy");
 const { successResponseWithData, ErrorResponse } = require("../helpers/apiResponse");
@@ -10,11 +11,11 @@ exports.singup = async (req, res) => {
         const { firstName, lastName, email, password, phoneNumber, shopName, shopUrl, } = req.body;
         const user = await User.findOne({ email: email })
         if (user) return ErrorResponse(res, "email allready exits !")
-        let fName=req.body.firstName,
-            lName=req.body.lastName
-        const fullName=`${fName} ${lName}`
+        let fName = req.body.firstName,
+            lName = req.body.lastName
+        const fullName = `${fName} ${lName}`
 
-        let temp = { firstName, lastName, email, password,fullName, phoneNumber, shopName, shopUrl, role: "vendor" }
+        let temp = { firstName, lastName, email, password, fullName, phoneNumber, shopName, shopUrl, role: "vendor" }
         let vendorDetail = await User.create(temp);
 
         return successResponseWithData(res, "Success", vendorDetail);
@@ -34,7 +35,7 @@ exports.singin = async (req, res) => {
             if (user.authenticate(req.body.password) && user.role === "vendor") {
                 const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECREAT, { expiresIn: '2d' });
                 const { _id, firstName, lastName, phoneNumber, email, role, fullName } = user;
-                let data =  {
+                let data = {
                     token,
                     user: {
                         _id, firstName, lastName, phoneNumber, email, role, fullName
@@ -87,9 +88,9 @@ exports.resetPassword = async (req, res) => {
             if (otp !== payLoad.otp) {
                 return ErrorResponse(res, " wrong otp !")
             }
-             user.password=newPassword
-             user.forgotPasswordOtp=""
-             await user.save()
+            user.password = newPassword
+            user.forgotPasswordOtp = ""
+            await user.save()
             return successResponseWithData(res, "success", "password updated successfully")
         });
     } catch (error) {
@@ -150,5 +151,41 @@ exports.productDetail = async (req, res) => {
     let productDetail = await productModel.findOne({ _id: productId });
     return successResponseWithData(res, "success", productDetail)
 };
+
+exports.getOrders = async (req, res) => {
+    try {
+        const user = req.user
+        const orderList = await orderModel.find({ user: user._id })
+            .select("_id paymentStatus paymentType orderStatus items")
+            .populate("items.productId", "_id name productPictures");
+        return successResponseWithData(res, "success", orderList)
+    } catch (error) {
+        return ErrorResponse(res, "some thing wet wrong!");
+    }
+
+}
+
+exports.getOrder = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const order = await orderModel.findOne({ _id: orderId })
+            .populate("items.productId", "_id name image")
+            .lean();
+        if (!order) return ErrorResponse(res, "order not found for this product")
+        if (order) {
+            const address = await addressModel.findOne({ user: req.user._id });
+            if (!address) return ErrorResponse(res, "Address not found please add address")
+            // order.address = address.address.find(
+            //     (adr) => adr._id.toString() == order.addressId.toString()
+            //   );
+            const data = { order, address }
+            return successResponseWithData(res, "success", data)
+        }
+    } catch (error) {
+        return ErrorResponse(res, "some thing went wrong!");
+    }
+
+}
+
 
 //findOneAndUpdate({ _id: user._id }, { $set: { password: newPassword, forgotPasswordOtp: "" } }, { new: true });

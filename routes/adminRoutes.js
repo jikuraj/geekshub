@@ -27,6 +27,9 @@ router.get("/productList",auth,controller.getProduct);
 router.get("/productDetail/:productId",controller.productDetail);
 router.post("/poster",auth,upload.array('image'),controller.poster)
 
+router.get("/getOrders",auth,  controller.getOrders);
+router.get("/getOrder/:orderId", auth, controller.getOrder);
+
 
 
 module.exports=router;

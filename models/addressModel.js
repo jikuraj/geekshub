@@ -47,9 +47,11 @@ const addressSchema=new mongoose.Schema({
     }
 },{timestamps:true});
 
+  
+
 addressSchema.virtual('fullName')
 .get(function(){
     return `${this.firstName} ${this.lastName}`;
 })
 
-module.exports =mongoose.model("address",addressSchema, "address"); 
+module.exports =mongoose.model("Address",addressSchema); 
