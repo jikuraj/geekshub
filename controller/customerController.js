@@ -178,7 +178,6 @@ exports.resetPassword = async (req, res) => {
             if (otp !== payLoad.otp) {
                 return ErrorResponse(res, " wrong otp !")
             }
-            // await User.findOneAndUpdate({ _id: user._id }, { $set: { password: newPassword, forgotPasswordOtp: "" } }, { new: true });
             user.password = newPassword
             user.forgotPasswordOtp = ""
             await user.save()
