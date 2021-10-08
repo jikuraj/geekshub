@@ -98,8 +98,8 @@ exports.updateProfile = async (req, res) => {
 exports.addAddress = async (req, res) => {
     try {
         const user = req.user;
-        const { firstName, lastName, pincode, phone, address, city, state, landmark, addressType } = req.body;
-        let temp = { firstName, lastName, pincode, phone, address, city, state, landmark, addressType, userId: user._id }
+        const { firstName, lastName, pincode, mobile, address, city, state, landmark, addressType } = req.body;
+        let temp = { firstName, lastName, pincode, mobile, address, city, state, landmark, addressType, userId: user._id }
         let addressDetail = await addressModel.create(temp);
         return successResponseWithData(res, "Success", addressDetail);
     } catch (error) {
