@@ -124,12 +124,12 @@ exports.editAddress = async (req, res) => {
         const user = req.user;
         const addressId = req.params.addressId;
 
-        const { firstName, lastName, pincode, phone, address, city, state, landmark, addressType } = req.body;
+        const { firstName, lastName, pincode,mobile, address, city, state, landmark, addressType } = req.body;
         let dataToSet = {}
         firstName ? dataToSet.firstName = firstName : true;
         lastName ? dataToSet.lastName = lastName : true;
         pincode ? dataToSet.pincode = pincode : true;
-        phone ? dataToSet.phone = phone : true;
+        mobile ? dataToSet.mobile = mobile : true;
         address ? dataToSet.address = address : true;
         city ? dataToSet.city = city : true;
         state ? dataToSet.state = state : true;
