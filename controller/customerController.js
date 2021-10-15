@@ -10,6 +10,7 @@ const { successResponseWithData, ErrorResponse } = require("../helpers/apiRespon
 const orderModel = require("../models/orderModel");
 const categoryModel = require("../models/categoryModel");
 const brandModel = require("../models/brandModel");
+const contactModel=require("../models/contactus.js")
 
 exports.singup = async (req, res) => {
     try {
@@ -163,6 +164,26 @@ exports.forgotPassword = async (req, res) => {
     } catch (error) {
         console.log("error", error);
         return ErrorResponse(res, " something is wrong !")
+    }
+}
+exports.addcontact = async (req,res)=>{
+    try{
+        const {yourname,phonenumber,emailaddress,message} = req.body
+        const temp={
+            yourname,
+            phonenumber,
+            emailaddress,
+            message
+
+        }
+        const contact = await contactModel.create(temp)
+        const result = await contact.save()
+        return successResponseWithData(res, "your message is recorded", result)
+
+
+
+    }catch(error){
+        return ErrorResponse(res, "some thing wet wrong!")
     }
 }
 

@@ -51,6 +51,9 @@ const orderSchema = new mongoose.Schema(
         },
       },
     ],
+    orderid:{
+      type:String
+    }
   },
   { timestamps: true }
 );

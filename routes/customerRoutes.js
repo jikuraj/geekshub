@@ -48,6 +48,7 @@ router.get("/vendorPage", controller.vendorPage);
 router.get("/topPicksPage",  controller.topPicksPage);
 router.get("/brandsPage", controller.brandsPage);
 router.get("/categoryPage",  controller.categoryPage);
+router.post("/contactus",controller.addcontact)
 
 
 module.exports=router;
