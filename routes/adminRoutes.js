@@ -31,7 +31,7 @@ router.get("/getOrders",auth,  controller.getOrders);
 router.get("/getOrder/:orderId", auth, controller.getOrder);
 router.post("/brand",auth,upload.array('image'),controller.addBrand)
 router.post("/category",auth,upload.array('image'),controller.addCategory)
-router.post("/contactus",controller.addcontactus)
+router.post("/contactus",auth,controller.addcontactus)
 
 
 
