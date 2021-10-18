@@ -31,7 +31,19 @@ exports.validateProfile=[
 
 
 
-exports.addAddress = [
+exports.validateaddAddress = [
+    check('firstName')
+    .notEmpty()
+    .withMessage("firstName is required"),
+    check('lastName')
+    .notEmpty()
+    .withMessage("lastName is required"),
+   check('pincode')
+   .notEmpty()
+   .withMessage("pincode is required"),
+   check('mobile')
+   .notEmpty()
+   .withMessage("mobile number is required"),
     
 ]
 

@@ -2,6 +2,7 @@ const User = require("../models/user")
 const productModel = require("../models/productModel");
 const posterModel = require("../models/posterModel");
 const orderModel = require("../models/orderModel")
+const contactModel=require("../models/contactus.js")
 
 const shortid = require("shortid");
 const slugify = require("slugify");
@@ -189,6 +190,24 @@ exports.addCategory = async (req, res) => {
         return successResponseWithData(res, "success", category)
 
     } catch (error) {
+        return ErrorResponse(res, "some thing wet wrong!")
+    }
+}
+exports.addcontactus = async (req,res)=>{
+    try{
+        const {address,phonenumber,emailaddress} = req.body
+        const temp={
+            address,
+            phonenumber,
+            emailaddress
+        }
+        const contact = await contactModel.create(temp)
+        const result = await contact.save()
+        return successResponseWithData(res, "success", result)
+
+
+
+    }catch(error){
         return ErrorResponse(res, "some thing wet wrong!")
     }
 }

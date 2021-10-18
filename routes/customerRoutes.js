@@ -4,7 +4,7 @@ const path=require("path");
 const fileExtension=require("file-extension")
 const crypto=require("crypto")
 const auth = require("../middleware/index.js").authCustomer;
-const {validateSingupRequest,validateSinginRequest,validateProfile, isRequestValidated}=require("../validators/validate")
+const {validateSingupRequest,validateSinginRequest,validateProfile, isRequestValidated,validateaddAddress}=require("../validators/validate")
 const controller = require("../controller/customerController");
 var storage = multer.diskStorage({
     destination: function (req, file, callback) {
@@ -25,7 +25,7 @@ router.post("/signup",validateSingupRequest,isRequestValidated,controller.singup
 router.post("/signin",validateSinginRequest,isRequestValidated,controller.singin)
 router.get("/profile",auth, controller.getProfile)
 router.put("/profile",auth, validateProfile,upload.single("image"),controller.updateProfile)
-router.post("/address",auth,controller.addAddress)
+router.post("/address",auth,validateaddAddress,isRequestValidated,controller.addAddress)
 router.get("/address",auth,controller.getAddress)
 router.put("/address/:addressId",auth,controller.editAddress)
 router.post("/logout",auth,controller.logout)
@@ -48,6 +48,7 @@ router.get("/vendorPage", controller.vendorPage);
 router.get("/topPicksPage",  controller.topPicksPage);
 router.get("/brandsPage", controller.brandsPage);
 router.get("/categoryPage",  controller.categoryPage);
+router.post("/contactus",auth,controller.addcontact)
 
 
 module.exports=router;

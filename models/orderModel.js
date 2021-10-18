@@ -51,8 +51,27 @@ const orderSchema = new mongoose.Schema(
         },
       },
     ],
+    orderid:{
+      type:String
+    }
   },
   { timestamps: true }
 );
 
 module.exports = mongoose.model("Order", orderSchema);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// this is orders

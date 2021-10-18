@@ -10,6 +10,7 @@ const { successResponseWithData, ErrorResponse } = require("../helpers/apiRespon
 const orderModel = require("../models/orderModel");
 const categoryModel = require("../models/categoryModel");
 const brandModel = require("../models/brandModel");
+const contactModel=require("../models/contactus.js")
 
 exports.singup = async (req, res) => {
     try {
@@ -98,8 +99,8 @@ exports.updateProfile = async (req, res) => {
 exports.addAddress = async (req, res) => {
     try {
         const user = req.user;
-        const { firstName, lastName, pincode, phone, address, city, state, landmark, addressType } = req.body;
-        let temp = { firstName, lastName, pincode, phone, address, city, state, landmark, addressType, userId: user._id }
+        const { firstName, lastName, pincode, mobile, address, city, state, landmark, addressType } = req.body;
+        let temp = { firstName, lastName, pincode, mobile, address, city, state, landmark, addressType, userId: user._id }
         let addressDetail = await addressModel.create(temp);
         return successResponseWithData(res, "Success", addressDetail);
     } catch (error) {
@@ -124,12 +125,12 @@ exports.editAddress = async (req, res) => {
         const user = req.user;
         const addressId = req.params.addressId;
 
-        const { firstName, lastName, pincode, phone, address, city, state, landmark, addressType } = req.body;
+        const { firstName, lastName, pincode,mobile, address, city, state, landmark, addressType } = req.body;
         let dataToSet = {}
         firstName ? dataToSet.firstName = firstName : true;
         lastName ? dataToSet.lastName = lastName : true;
         pincode ? dataToSet.pincode = pincode : true;
-        phone ? dataToSet.phone = phone : true;
+        mobile ? dataToSet.mobile = mobile : true;
         address ? dataToSet.address = address : true;
         city ? dataToSet.city = city : true;
         state ? dataToSet.state = state : true;
@@ -163,6 +164,26 @@ exports.forgotPassword = async (req, res) => {
     } catch (error) {
         console.log("error", error);
         return ErrorResponse(res, " something is wrong !")
+    }
+}
+exports.addcontact = async (req,res)=>{
+    try{
+        const {yourname,phonenumber,emailaddress,message} = req.body
+        const temp={
+            yourname,
+            phonenumber,
+            emailaddress,
+            message
+
+        }
+        const contact = await contactModel.create(temp)
+        const result = await contact.save()
+        return successResponseWithData(res, "your message is recorded", result)
+
+
+
+    }catch(error){
+        return ErrorResponse(res, "some thing wet wrong!")
     }
 }
 
@@ -451,3 +472,19 @@ exports.vendorPage = async (req, res) => {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// this is controller
