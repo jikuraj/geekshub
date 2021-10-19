@@ -144,6 +144,16 @@ exports.editAddress = async (req, res) => {
         return ErrorResponse(res, { message: "somethink is wrong!" });
     }
 }
+exports.deleteAddress = async (req, res) => {
+    try {
+        const addressId = req.params.addressId;
+        await addressModel.deleteOne({ _id: addressId });
+        return successResponseWithData(res, "success", {})
+    } catch (error) {
+        console.log("error", error);
+        return ErrorResponse(res, { message: "somethink is wrong!" });
+    }
+}
 
 exports.logout = async (req, res) => {
     return successResponseWithData(res, "Success", {});
@@ -225,7 +235,7 @@ exports.getProduct = async (req, res) => {
     fromPrice ? criteria.push({ price: { $gte: fromPrice } }) : true;
     toPrice ? criteria.push({ price: { $lte: toPrice } }) : true;
 
-    let sort = sortPrice ? { price: Number(sortPrice) } : { name: 1 }
+    let sort = sortPrice ?  { price: Number(sortPrice) } : { price: 1 } 
     let products = await productModel.find({ $and: criteria })
     .populate("category")
     .populate("brand")

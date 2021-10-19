@@ -28,6 +28,7 @@ router.put("/profile",auth, validateProfile,upload.single("image"),controller.up
 router.post("/address",auth,validateaddAddress,isRequestValidated,controller.addAddress)
 router.get("/address",auth,controller.getAddress)
 router.put("/address/:addressId",auth,controller.editAddress)
+router.delete("/address/:addressId",auth,controller.deleteAddress)
 router.post("/logout",auth,controller.logout)
 router.post("/forgotPassword",controller.forgotPassword);
 router.get("/productList",controller.getProduct)
