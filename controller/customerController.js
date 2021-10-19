@@ -357,7 +357,7 @@ exports.getOrders = async (req, res) => {
     try {
         const user = req.user
         const orderList = await orderModel.find({ user: user._id })
-            .select("_id paymentStatus paymentType orderStatus items")
+            .select("_id paymentStatus paymentType orderStatus items totalAmount")
             .populate("items.productId", "_id name image");
         return successResponseWithData(res, "success", orderList)
     } catch (error) {
